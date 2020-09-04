@@ -1,0 +1,183 @@
+---
+title: "Title"
+subtitle: "Subtitle"  
+author: "Lars Schoebitz"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+---
+
+
+```{r setup, include=FALSE}
+
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(
+  echo = FALSE, warning = FALSE, message = FALSE,
+  fig.height = 6, fig.width = 12, dev = "svg"
+)
+
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+
+style_duo_accent(
+  primary_color = "#1381B0",
+  secondary_color = "#FF961C",
+  inverse_header_color = "#FFFFFF"
+)
+
+```
+
+```{r}
+
+library(tidyverse)
+library(readr)
+library(tmap)
+library(grDevices)
+#library(Cairo)
+
+```
+
+
+```{r}
+
+url = "https://github.com/larnsce/sanitation_data/raw/master/data/derived_data/2020-09-03_jmp_sanitation_raw_data.rds"
+
+download.file(url, destfile = here::here("data/2020-09-03_jmp_sanitation_raw_data.rds"))
+
+jmpraw <- read_rds(here::here("data/2020-09-03_jmp_sanitation_raw_data.rds"))
+
+```
+
+```{r}
+
+# data manipulation
+
+## ww treatment
+
+ww_treatment <- jmpraw %>% 
+  filter(!is.na(san_service_chain)) %>%
+  filter(
+    san_service_chain == "WW treatment"
+  ) %>% 
+  group_by(iso3, san_service_chain) %>% 
+  count()
+
+## fs treatment
+
+fs_treatment <- jmpraw %>% 
+  filter(!is.na(san_service_chain)) %>%
+  filter(
+    san_service_chain == "FS treatment"
+  ) %>% 
+  group_by(iso3, san_service_chain) %>% 
+  count()
+
+```
+
+```{r}
+
+# world map data
+
+data("World")
+
+world_ww_treatment <- World %>% 
+  left_join(ww_treatment, by = c("iso_a3" = "iso3")) %>% 
+  filter(continent != "Antarctica") 
+
+world_fs_treatment <- World %>% 
+  left_join(fs_treatment, by = c("iso_a3" = "iso3")) %>% 
+  filter(continent != "Antarctica")
+
+```
+
+
+class: inverse, center, middle
+
+# The 6.2.1 data gap
+
+---
+
+```{r}
+
+## figure 1
+
+jmpraw %>% 
+  filter(!is.na(san_service_chain)) %>% 
+  group_by(san_service_chain) %>% 
+  count() %>% 
+  
+  ## plot
+  
+  ggplot(aes(x = san_service_chain, y = n)) +
+  geom_col() +
+  labs(
+    title = "Number of data points along sanitation service chain",
+    subtitle = "For 232 countries; since 1995",
+    y = "Data points",
+    x = "Sanitation Service Chain"
+  ) +
+  theme_minimal() +
+  scale_y_continuous(breaks = seq(0, 9000, 1000))
+
+```
+
+
+---
+
+```{r}
+
+jmpraw %>% 
+  filter(!is.na(san_service_chain)) %>% 
+  group_by(san_service_chain) %>% 
+  count() %>% 
+  ggplot(aes(x = san_service_chain, y = n)) +
+  geom_col() +
+  labs(
+    title = "Number of data points along sanitation service chain",
+    subtitle = "For 232 countries; since 1995",
+    y = "Data points",
+    x = "Sanitation Service Chain"
+  ) +
+  annotate("text", x = 5, y = 1750, label = "388") +
+  annotate("text", x = 6, y = 1750, label = "7") +
+  annotate("text", x = 7, y = 1750, label = "58") +
+  annotate("text", x = 8, y = 1750, label = "756") +
+  theme_minimal() +
+  scale_y_continuous(breaks = seq(0, 9000, 1000))
+
+
+```
+
+---
+
+```{r}
+
+tm_shape(world_ww_treatment) +
+  tm_polygons(col = "n", title = "Data points")
+
+
+```
+
+---
+
+```{r}
+
+tmap_mode("view")
+
+tm_shape(world_fs_treatment) +
+  tm_polygons(col = "n", title = "Data points")
+
+
+```
+
+
