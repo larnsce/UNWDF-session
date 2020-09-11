@@ -1,0 +1,28 @@
+/* Extra CSS */
+.bottom {
+  position: fixed;
+  text-align: right;
+  font-family: "Fira Mono";
+  line-height: 0.7;
+  right: 0;
+  bottom: 0;
+  padding-right: 100px;
+  padding-bottom: 100px;
+}
+.tip {
+  padding: 7px 7px;
+  margin-top: 10 px;
+  margin-bottom: 10px;
+  color: #1F4257;
+  border-right: solid 10px #F97B64;
+  background-color: #E7E7E7;
+}
+.tip:before {
+  content: "Note";
+  font-size: 120%;
+  font-weight: bold;
+  color: #F97B64;
+}
+.big {
+  font-size: 250%;
+}
