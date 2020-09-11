@@ -41,3 +41,4 @@ vignettes/*.pdf
 # ignore dirs
 notebook/*
 session/*
+bios/*
